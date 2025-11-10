@@ -58,6 +58,40 @@ create table BookListings (
 	PurchaseType	purchase_e		not null
 );
 
+-- Permissions management
+
+GRANT ALL ON SCHEMA public TO michael_mark;
+GRANT ALL ON TABLE public.booklistings TO michael_mark;
+GRANT ALL ON TABLE public.books TO michael_mark;
+GRANT ALL ON TABLE public.coursebooks TO michael_mark;
+GRANT ALL ON TABLE public.courses TO michael_mark;
+GRANT ALL ON TABLE public.schools TO michael_mark;
+GRANT ALL ON TABLE public.users TO michael_mark;
+
+GRANT ALL ON SCHEMA public TO khadijah_wright;
+GRANT ALL ON TABLE public.booklistings TO khadijah_wright;
+GRANT ALL ON TABLE public.books TO khadijah_wright;
+GRANT ALL ON TABLE public.coursebooks TO khadijah_wright;
+GRANT ALL ON TABLE public.courses TO khadijah_wright;
+GRANT ALL ON TABLE public.schools TO khadijah_wright;
+GRANT ALL ON TABLE public.users TO khadijah_wright;
+
+GRANT ALL ON SCHEMA public TO scott_harris;
+GRANT ALL ON TABLE public.booklistings TO scott_harris;
+GRANT ALL ON TABLE public.books TO scott_harris;
+GRANT ALL ON TABLE public.coursebooks TO scott_harris;
+GRANT ALL ON TABLE public.courses TO scott_harris;
+GRANT ALL ON TABLE public.schools TO scott_harris;
+GRANT ALL ON TABLE public.users TO scott_harris;
+
+GRANT ALL ON SCHEMA public TO beau_coffie;
+GRANT ALL ON TABLE public.booklistings TO beau_coffie;
+GRANT ALL ON TABLE public.books TO beau_coffie;
+GRANT ALL ON TABLE public.coursebooks TO beau_coffie;
+GRANT ALL ON TABLE public.courses TO beau_coffie;
+GRANT ALL ON TABLE public.schools TO beau_coffie;
+GRANT ALL ON TABLE public.users TO beau_coffie;
+
 -- Dummy data; in production it's probably best to comment these lines out
 
 insert into Schools (SchoolName, Acronym, Address) values
@@ -65,7 +99,7 @@ insert into Schools (SchoolName, Acronym, Address) values
 ('Oregon Institute of Technology (Portland-Metro Campus)', 'OIT', 'Wilsonville, OR');
 
 insert into Courses (SchoolID, CRN, CourseCode, CourseName, StartDate) values
-(2, 10638, 'CST 316', 'JR Team-Based Proj Dev I', '2025-10-01');
+(2, 10638, 'CST 316 01P', 'JR Team-Based Proj Dev I', '2025-10-01');
 
 insert into Books (ISBN, BookTitle, Description, Authors, Publishers, PublishDate) values
 ('9780930289232', 'Watchmen', '', 'Alan Moore, Dave Gibbons', 'DC Comics', 'April 1, 1995');
