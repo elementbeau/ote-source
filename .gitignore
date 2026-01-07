@@ -1,6 +1,7 @@
 bin/
 obj/
 frontend/dist
+frontend/artifact
 frontend/node_modules
 frontend/src/routeTree.gen.ts
 frontend/.tanstack/
