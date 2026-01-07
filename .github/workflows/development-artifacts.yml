@@ -1,5 +1,9 @@
 name: Upload React Dev Artifacts to S3
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   push:
     branches: 
