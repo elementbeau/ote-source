@@ -2,30 +2,31 @@ name: Upload React Dev Artifacts to S3
 
 on:
   push:
-    branches: [ "development" ]
-  pull_request:
-    branches: [ "development" ]
+    branches: 
+    - development
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    #strategy:
-      #matrix:
-        #node-version: [22.x]
-
     steps:
+    
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Use Node.js #${{ matrix.node-version }}
+      
+    - name: Use Node.js
       uses: actions/setup-node@v4
-      #with:
-        #node-version: ${{ matrix.node-version }}
-        #cache: 'npm'
+      
     - name: Install dependencies
-      run: cd frontend; npm ci
+      run: cd frontend && npm ci
+      
     - name: Build artifacts
-      run: cd frontend; npx vite build --base='https://development.opentextbookexchange.shop/artifact'
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v5.0.0
+      run: cd frontend && npx vite build --base='https://development.opentextbookexchange.shop/artifact' --outDir artifact
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v5.1.0
       with:
-        path: frontend/dist
+        aws-region: us-west-2
+        role-to-assume: arn:aws:iam::980268628266:role/development-cd-role
+
+    - name: Upload build artifacts to S3
+      run: aws s3 sync frontend/artifact s3://your-bucket-name/ --delete --acl public-read
