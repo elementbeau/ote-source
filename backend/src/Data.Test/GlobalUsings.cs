@@ -1,4 +1,4 @@
-global using NUnit.Framework;
+global using Xunit;
 global using OTE.Data.EFCore.Contexts;
 global using OTE.Data.EFCore.Dtos;
 global using OTE.Data.EFCore.Entities;

@@ -1,43 +1,38 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Text.Json;
 
-namespace Data.Test;
+namespace OTE.Data.Test;
 
-public class Tests
+public class Tests : IDisposable
 {
     private OteContextFactory _factory = null!;
     private OteContext _context = null!;
     private SchoolRepo _repo = null!;
     private IDbContextTransaction _transaction = null!;
 
-    [SetUp]
-    public async Task Setup()
+    public Tests()
     {
         _factory = new OteContextFactory();
         _context = _factory.CreateDbContext([]);
         _repo = new SchoolRepo(_context);
-        _transaction = await _context.Database.BeginTransactionAsync();
+        _transaction = _context.Database.BeginTransaction();
     }
 
-    [TearDown]
-    public async Task Teardown()
+    public void Dispose()
     {
-        await _transaction.RollbackAsync();
+        _transaction.Rollback();
     }
 
-    [Test]
+    [Fact]
     public void SetupTest()
     {
         if (_repo == null)
-            Assert.Fail();
-        else
-            Assert.Pass();
+            Assert.Fail("_repo is null");
     }
 
-    [Test]
-    public async Task BasicCRUD()
+    [Fact]
+    public async Task BasicCRUDTest()
     {
-
         var dto = new SchoolDto
         {
             SchoolName = "Foo Bar",
@@ -46,21 +41,21 @@ public class Tests
             City = "Nowhere"
         };
 
-        Assert.That(await _repo.Insert(dto), Is.EqualTo(1));
+        Assert.Equal(1, await _repo.Insert(dto));
 
         var all = await _repo.GetAll();
-        Assert.That(all.Count(), Is.EqualTo(1));
+        Assert.Single(all);
 
         int key = all.First().SchoolID;
 
-        Assert.That(JsonSerializer.Serialize(all.First()), Is.EqualTo(JsonSerializer.Serialize(new SchoolEntity
+        Assert.Equal(JsonSerializer.Serialize(new SchoolEntity
         {
             SchoolID = key,
             SchoolName = "Foo Bar",
             SchoolAcronym = "FB",
             State = "OR",
             City = "Nowhere"
-        })));
+        }), JsonSerializer.Serialize(all.First()));
 
         dto = new SchoolDto
         {
@@ -70,19 +65,20 @@ public class Tests
             City = "Nowhere"
         };
 
-        Assert.That(await _repo.Update(key, dto), Is.EqualTo(1));
-        Assert.That(all.Count(), Is.EqualTo(1));
-        Assert.That(JsonSerializer.Serialize(all.First()), Is.EqualTo(JsonSerializer.Serialize(new SchoolEntity
+        Assert.Equal(1, await _repo.Update(key, dto));
+        Assert.Single(all);
+        Assert.Equal(JsonSerializer.Serialize(new SchoolEntity
         {
             SchoolID = key,
             SchoolName = "Baz Quz",
             SchoolAcronym = "BQ",
             State = "OR",
             City = "Nowhere"
-        })));
+        }), JsonSerializer.Serialize(all.First()));
 
-        Assert.That(await _repo.Delete(key), Is.EqualTo(1));
+        Assert.Equal(1, await _repo.Delete(key));
         all = await _repo.GetAll();
-        Assert.That(all.Count(), Is.EqualTo(0));
+        Assert.Empty(all);
     }
 }
+
