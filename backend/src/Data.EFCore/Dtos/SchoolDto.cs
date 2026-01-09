@@ -3,6 +3,7 @@ using OTE.Data.EFCore.Entities;
 
 namespace OTE.Data.EFCore.Dtos;
 
+/// <summary>`IDto` corresponding to `SchoolEntity`.</summary>
 public class SchoolDto : IDto<SchoolEntity>
 {
     [MaxLength(255)]

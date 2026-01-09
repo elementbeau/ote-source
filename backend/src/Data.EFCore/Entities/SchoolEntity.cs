@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace OTE.Data.EFCore.Entities;
 
+/// <summary>Entity type for representing schools.</summary>
 public class SchoolEntity
 {
     [Key]

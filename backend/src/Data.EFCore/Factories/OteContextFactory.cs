@@ -5,13 +5,19 @@ using OTE.Data.EFCore.Contexts;
 
 namespace OTE.Data.EFCore.Factories;
 
+/// <summary>Factory-pattern class for getting `OteContext`s.</summary>
 public class OteContextFactory : IDesignTimeDbContextFactory<OteContext>
 {
+    /// <summary>Creates a new `OteContext`.</summary>
+    /// <returns>A configured `OteContext` instance.</returns>
     public OteContext CreateDbContext()
     {
         return CreateDbContext([]);
     }
 
+    /// <summary>Interface method for `IDesignTimeDbContextFactory`. Use the parameterless expression instead.</summary>
+    /// <param name="args">Unused; only exists for the interface method.</param>
+    /// <returns>A configured `OteContext` instance.</returns>
     public OteContext CreateDbContext(string[] args)
     {
         var configuration = new ConfigurationBuilder()
