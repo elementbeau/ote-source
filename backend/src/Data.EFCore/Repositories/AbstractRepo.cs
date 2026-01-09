@@ -13,7 +13,7 @@ public abstract class AbstractRepo<TEntity, TDto>(OteContext context)
     where TEntity : class
     where TDto : IDto<TEntity>
 {
-    private DbSet<TEntity> _dbSet = context.Set<TEntity>();
+    protected DbSet<TEntity> _dbSet = context.Set<TEntity>();
 
     /// <summary>Gets all entities in the table.</summary>
     /// <returns>The entities in the table.</returns>
