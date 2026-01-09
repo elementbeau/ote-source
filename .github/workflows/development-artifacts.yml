@@ -6,23 +6,23 @@ permissions:
 
 on:
   push:
-    branches: 
+    branches:
     - development
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    
+
     - name: Checkout
       uses: actions/checkout@v4
-      
+
     - name: Use Node.js
       uses: actions/setup-node@v4
-      
+
     - name: Install dependencies
       run: cd frontend && npm ci
-      
+
     - name: Build artifacts
       run: cd frontend && npx vite build --base='https://development.opentextbookexchange.shop/artifact' --outDir artifact
 
@@ -30,7 +30,8 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v5.1.0
       with:
         aws-region: us-west-2
-        role-to-assume: arn:aws:iam::980268628266:role/development-cd-role
+        aws-access-key-id: ${{ secrets.AWS_DEVELOPMENT_CD_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_DEVELOPMENT_CD_SECRET_ACCESS_KEY }}
 
     - name: Upload build artifacts to S3
       run: aws s3 sync frontend/artifact s3://ote-frontend-source-development/artifact --delete
