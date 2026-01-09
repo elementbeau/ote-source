@@ -5,12 +5,16 @@ permissions:
   id-token: write
 
 on:
-  push:
-    branches:
-    - development
+  workflow_run:
+    workflows: ["Test Backend API"]
+    types:
+    - completed
 
 jobs:
-  build:
+  development-artifacts:
+    if: ${{ github.event.workflow_run.event == 'push'
+        && github.event.workflow_run.conclusion == 'success'
+        && github.event.workflow_run.head_branch == 'development' }}$
     runs-on: ubuntu-latest
     steps:
 
@@ -21,10 +25,14 @@ jobs:
       uses: actions/setup-node@v4
 
     - name: Install dependencies
-      run: cd frontend && npm ci
+      run: |
+        cd frontend
+        npm ci
 
     - name: Build artifacts
-      run: cd frontend && npx vite build --base='https://development.opentextbookexchange.shop/artifact' --outDir artifact
+      run: |
+        cd frontend
+        npx vite build --base='https://development.opentextbookexchange.shop/artifact' --outDir artifact
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v5.1.0

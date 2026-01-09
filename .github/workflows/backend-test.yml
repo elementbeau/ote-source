@@ -1,0 +1,23 @@
+name: Test Backend API
+
+on: [push, pull-request]
+
+jobs:
+  backend-test:
+    container:
+      image: mcr.microsoft.com/dotnet/sdk:8.0
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Create secrets.json
+      run: |
+        mkdir -p ~/.microsoft/usersecrets/7dd46374-7b55-442e-b4b3-1ae375510d4e
+        echo '{ "ConnectionStrings:OteDb": "${{ secrets.AWS_RDS_CONNECTION_STRING }}" }' > ~/.microsoft/usersecrets/7dd46374-7b55-442e-b4b3-1ae375510d4e/secrets.json
+
+    - name: Run tests
+      run: |
+        cd backend
+        dotnet test
