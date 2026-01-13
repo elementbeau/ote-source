@@ -42,7 +42,7 @@ function ExplorePage() {
                         { /** Book listing Rows and Columns */}
                         { /** NEW FLEX GRID */}
                         <h1 className="text-2x1 text-white">
-                        <section className="h-auto items-center justify-center bg-amber-200">
+                        <section className="h-auto items-center justify-center bg-gray-400">
                             <div className="mx-auto p-6 w-auto px-4 flex flex-wrap items-center gap-8 ">
                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map((num) => (
                                     <div key={num} className="rounded-2xl border p-2 shadow-sm bg-white">
