@@ -34,7 +34,7 @@ export default function SiteHeader() {
             onClick = {() => setIsLoginOpen(true)}
             className = "rounded-lg px-3 py-2 bg-gray-900 text-white text-sm ml-auto"
           >
-            Sign in
+            Log in
           </button>
         </div>
       </header>
