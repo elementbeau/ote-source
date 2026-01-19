@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FormError from "../UI/FormError";
 
 type LoginFormProps = {
     onLogin?: (email: string, password: string) => void;
@@ -13,9 +14,26 @@ export default function LoginForm({
 }: LoginFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState<string | null>(null);
+
+    const emailOk = email.includes("@") && email.includes(".");
+    const passwordOk = password.length >= 6;
+    const canSubmit = emailOk && passwordOk;
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+
+        if (!emailOk) {
+            setError("Please enter a valid email address.");
+            return;
+        }
+
+        if (!passwordOk) {
+            setError("Password must be at least 6 characters.");
+            return;
+        }
+
+        setError(null);
         onLogin?.(email, password);
     }
 
@@ -31,7 +49,10 @@ export default function LoginForm({
                     type="email"
                     autoComplete="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (error) setError(null);
+                    }}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                     placeholder="you@example.com"
                     required
@@ -48,17 +69,23 @@ export default function LoginForm({
                     type="password"
                     autoComplete="current-password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (error) setError(null);
+                    }}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                     placeholder="password"
                     required
                 />
             </div>
 
+            <FormError message={error} />
+
             {/* Buttons */}
             <div className="space-y-2 pt-2">
                 <button
                     type="submit"
+                    disabled={!canSubmit} //Disabled until valid
                     className="w-full rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
                     >
                     Log in
