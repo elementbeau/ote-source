@@ -1,5 +1,6 @@
 import { useState } from "react";
 import FormError from "../UI/FormError";
+import PasswordInput from "../UI/PasswordInput";
 
 type LoginFormProps = {
     onLogin?: (email: string, password: string) => void;
@@ -61,21 +62,12 @@ export default function LoginForm({
 
             {/* Password */}
             <div className = "space-y-1">
-                <label className = "text-sm font-medium text-gray-700" htmlFor="password">
-                    Password
-                </label>
-                <input
-                    id="password"
-                    type="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => {
-                        setPassword(e.target.value);
-                        if (error) setError(null);
-                    }}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    placeholder="password"
-                    required
+                <PasswordInput
+                value={password}
+                onChange={(val) => {
+                    setPassword(val);
+                    if (error) setError(null);
+                }}
                 />
             </div>
 
