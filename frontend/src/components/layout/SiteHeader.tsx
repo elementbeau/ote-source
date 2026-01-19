@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import LoginModal from "../auth/LoginModal";
+import AuthModal from "../auth/AuthModal";
+
 
 export default function SiteHeader() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -38,11 +39,8 @@ export default function SiteHeader() {
           </button>
         </div>
       </header>
-      
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-      />
+
+      <AuthModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </>
   );
 }
