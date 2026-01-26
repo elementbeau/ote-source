@@ -20,7 +20,7 @@ export default function SiteHeader() {
             <Link to="/" className="hover:text-gray-900 text-lg pl-40">Home</Link>
             <Link to="/explore" className="hover:text-gray-900 text-lg pl-10 border-l border-gray-300">Explore</Link>
             <Link to="/about" className="hover:text-gray-900 text-lg pl-10 border-l border-gray-300">About</Link>
-            <Link to="/test" className="hover:text-gray-900 text-lg pl-10 border-l border-gray-300">Testing</Link>
+            <Link to="/account" className="hover:text-gray-900 text-lg pl-10 border-l border-gray-300">Account</Link>
           </nav>
 
           {/* Search Bar */}
@@ -39,7 +39,7 @@ export default function SiteHeader() {
             onClick={() => auth.logout()}
             className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
           >
-            Sign out
+            Logout
           </button>
           ) : (
           <button
@@ -47,7 +47,7 @@ export default function SiteHeader() {
             onClick={() => setIsLoginOpen(true)}
             className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
           >
-            Sign in
+            Login
           </button>
         )}
         </div>

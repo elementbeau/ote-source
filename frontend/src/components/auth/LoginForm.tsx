@@ -1,6 +1,6 @@
 import { useState } from "react";
-import FormError from "../UI/FormError";
-import PasswordInput from "../UI/PasswordInput";
+import FormError from "../ui/FormError";
+import PasswordInput from "../ui/PasswordInput";
 
 type LoginFormProps = {
     onLogin?: (email: string, password: string) => void | Promise<void>;

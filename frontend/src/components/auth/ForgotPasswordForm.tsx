@@ -1,5 +1,5 @@
 import { useState } from "react";
-import FormError from "../UI/FormError";
+import FormError from "../ui/FormError";
 
 type ForgotPasswordFormProps = {
   onSubmit?: (email: string) => void;
@@ -66,7 +66,7 @@ export default function ForgotPasswordForm({
           onClick={onBackToLogin}
           className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
         >
-          Back to sign in
+          Back to login
         </button>
       </div>
     </form>

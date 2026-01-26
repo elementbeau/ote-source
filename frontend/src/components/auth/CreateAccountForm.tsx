@@ -1,6 +1,6 @@
 import { useState } from "react";
-import FormError from "../UI/FormError";
-import PasswordInput from "../UI/PasswordInput";
+import FormError from "../ui/FormError";
+import PasswordInput from "../ui/PasswordInput";
 
 type CreateAccountFormProps = {
   onSubmit?: (email: string, password: string) => void;
@@ -81,7 +81,7 @@ export default function CreateAccountForm({
           onClick={onBackToLogin}
           className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
         >
-          Back to sign in
+          Back to login
         </button>
       </div>
     </form>
