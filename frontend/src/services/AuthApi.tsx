@@ -1,5 +1,6 @@
 export type AuthUser = {
   id: string;
+  username: string,
   email: string;
 };
 
@@ -22,6 +23,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 type StoredUser = {
   id: string;
   email: string;
+  username: string;
   password: string; // mock password
 };
 
@@ -50,7 +52,6 @@ function newId() {
 }
 
 function makeToken(userId: string) {
-  // mock token – just needs to be a string
   return `mock.${userId}.${Date.now()}`;
 }
 
@@ -80,7 +81,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
 
     return {
       token: makeToken(user.id),
-      user: { id: user.id, email: user.email },
+      user: { id: user.id, email: user.email, username: user.username },
     };
   }
 
@@ -94,7 +95,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
   return handleJson<LoginResponse>(res);
 }
 
-export async function register(email: string, password: string): Promise<LoginResponse> {
+export async function register(email: string, username: string, password: string): Promise<LoginResponse> {
   if (USE_MOCK) {
     await sleep(400);
 
@@ -102,20 +103,20 @@ export async function register(email: string, password: string): Promise<LoginRe
     const exists = users.some((u) => u.email.toLowerCase() === email.toLowerCase());
     if (exists) throw new ApiError(409, "An account with that email already exists.");
 
-    const created: StoredUser = { id: newId(), email, password };
+    const created: StoredUser = { id: newId(), email, username, password };
     users.push(created);
     saveUsers(users);
 
     return {
       token: makeToken(created.id),
-      user: { id: created.id, email: created.email },
+      user: { id: created.id, email: created.email, username: created.username },
     };
   }
 
   const res = await fetch(`${API_BASE}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, username, password }),
   });
 
   return handleJson<LoginResponse>(res);

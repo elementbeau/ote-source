@@ -3,7 +3,7 @@ import FormError from "../ui/FormError";
 import PasswordInput from "../ui/PasswordInput";
 
 type CreateAccountFormProps = {
-  onSubmit?: (email: string, password: string) => void;
+  onSubmit?: (email: string, username: string, password: string) => void;
   onBackToLogin?: () => void;
   isSubmitting?: boolean;
   serverError?: string | null;
@@ -17,24 +17,36 @@ export default function CreateAccountForm({
 }: CreateAccountFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const emailOk = email.includes("@") && email.includes(".");
+  const usernameOk = username.trim().length >= 3;
   const passwordOk = password.length >= 6;
-  const canSubmit = emailOk && passwordOk;
+  const passwordsMatch = password === confirmPassword;
+  const canSubmit = emailOk && usernameOk && passwordOk && passwordsMatch;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (!passwordsMatch) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     if (!canSubmit) {
       setError("Please enter a valid email and a password (6+ chars).");
       return;
     }
     setError(null);
-    onSubmit?.(email, password);
+    onSubmit?.(email, username, password);;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+
+      {/* Email */}
       <div className="space-y-1">
         <label className="text-sm font-medium text-gray-700" htmlFor="createEmail">
           Email
@@ -54,6 +66,27 @@ export default function CreateAccountForm({
         />
       </div>
 
+      {/* Username */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium text-gray-700" htmlFor="createUsername">
+          Username
+        </label>
+        <input
+          id="createUsername"
+          type="text"
+          autoComplete="username"
+          value={username}
+          onChange={(e) => {
+            setUsername(e.target.value);
+            if (error) setError(null);
+          }}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          placeholder="username"
+          required
+        />
+      </div>
+
+      {/* Password */}
       <PasswordInput
         id="createPassword"
         label="Password"
@@ -65,12 +98,24 @@ export default function CreateAccountForm({
         autoComplete="new-password"
       />
 
+            <PasswordInput
+        id="confirmPassword"
+        label="Confirm Password"
+        value={confirmPassword}
+        onChange={(val) => {
+          setConfirmPassword(val);
+          if (error) setError(null);
+        }}
+        autoComplete="new-password"
+      />
+
+      {/* Error Message */}
       <FormError message={serverError ?? error} />
 
       <div className="space-y-2 pt-2">
         <button
           type="submit"
-          disabled={!canSubmit || isSubmitting} //Disabled until input is valid and not submitting
+          disabled={!canSubmit || isSubmitting}
           className="w-full rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Create account

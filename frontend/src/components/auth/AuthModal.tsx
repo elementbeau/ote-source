@@ -1,5 +1,5 @@
 import { useState } from "react"
-import Modal from "../UI/Modal";
+import Modal from "../ui/Modal";
 import LoginForm from "./LoginForm";
 import CreateAccountForm from "./CreateAccountForm";
 import ForgotPasswordForm from "./ForgotPasswordForm";
@@ -22,6 +22,7 @@ export default function AuthModal({ isOpen, onClose}: AuthModalProps) {
     // Reset to login whenever it opens
     function handleClose() {
         setView('login');
+        setServerError(null);
         onClose();
     }
 
@@ -37,7 +38,7 @@ export default function AuthModal({ isOpen, onClose}: AuthModalProps) {
           serverError={serverError}
           isSubmitting={isSubmitting}
           onLogin={async (email: string, password: string) => {
-            console.log("Attempting login", { email });
+            console.log("Attempting login", { email }); // remove after done testing
             setIsSubmitting(true);
             setServerError(null);
             try {
@@ -60,11 +61,11 @@ export default function AuthModal({ isOpen, onClose}: AuthModalProps) {
         <CreateAccountForm onBackToLogin={() => {setServerError(null); setView("login");}}
             serverError={serverError}
             isSubmitting={isSubmitting}
-            onSubmit={async (email: string, password: string) => {
+            onSubmit={async (email: string, username: string, password: string) => {
             setIsSubmitting(true);
             setServerError(null);
             try {
-              const res = await authApi.register(email, password);
+              const res = await authApi.register(email, username, password);
               auth.login(res.token, res.user);
               handleClose(); // closes + resets view
             } catch (e) {
