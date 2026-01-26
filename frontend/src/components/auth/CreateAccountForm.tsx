@@ -5,11 +5,15 @@ import PasswordInput from "../UI/PasswordInput";
 type CreateAccountFormProps = {
   onSubmit?: (email: string, password: string) => void;
   onBackToLogin?: () => void;
+  isSubmitting?: boolean;
+  serverError?: string | null;
 };
 
 export default function CreateAccountForm({
   onSubmit,
   onBackToLogin,
+  isSubmitting = false,
+  serverError = null,
 }: CreateAccountFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,12 +65,12 @@ export default function CreateAccountForm({
         autoComplete="new-password"
       />
 
-      <FormError message={error} />
+      <FormError message={serverError ?? error} />
 
       <div className="space-y-2 pt-2">
         <button
           type="submit"
-          disabled={!canSubmit} //Disabled until input is valid
+          disabled={!canSubmit || isSubmitting} //Disabled until input is valid and not submitting
           className="w-full rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Create account

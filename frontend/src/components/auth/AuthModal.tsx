@@ -3,6 +3,8 @@ import Modal from "../UI/Modal";
 import LoginForm from "./LoginForm";
 import CreateAccountForm from "./CreateAccountForm";
 import ForgotPasswordForm from "./ForgotPasswordForm";
+import * as authApi from "../../services/AuthApi";
+import { useAuth } from "../auth/useAuth";
 
 type AuthView = 'login' | 'createAccount' | 'forgotPassword';
 
@@ -13,7 +15,10 @@ type AuthModalProps = {
 
 export default function AuthModal({ isOpen, onClose}: AuthModalProps) {
     const [view, setView] = useState<AuthView>('login');
-    
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [serverError, setServerError] = useState<string | null>(null);
+    const auth = useAuth();
+
     // Reset to login whenever it opens
     function handleClose() {
         setView('login');
@@ -27,28 +32,68 @@ export default function AuthModal({ isOpen, onClose}: AuthModalProps) {
 
     return (
     <Modal isOpen={isOpen} onClose={handleClose} title={title}>
-  
       {view === "login" && (
-        <LoginForm onLogin={(email, password) => {
-            console.log("login", { email, password });
+        <LoginForm
+          serverError={serverError}
+          isSubmitting={isSubmitting}
+          onLogin={async (email: string, password: string) => {
+            console.log("Attempting login", { email });
+            setIsSubmitting(true);
+            setServerError(null);
+            try {
+              const res = await authApi.login(email, password);
+              auth.login(res.token, res.user);
+              handleClose(); // closes + resets view
+            } catch (e) {
+              const msg = e instanceof Error ? e.message : "Login failed";
+              setServerError(msg);
+            } finally {
+              setIsSubmitting(false);
+            }
           }}
-          onCreateAccount={() => setView("createAccount")}
-          onForgotPassword={() => setView("forgotPassword")}
+          onCreateAccount={() => {setServerError(null); setView("createAccount");}}
+          onForgotPassword={() => {setServerError(null); setView("forgotPassword");}}
         />
       )}
 
       {view === "createAccount" && (
-        <CreateAccountForm onBackToLogin={() => setView("login")}
-            onSubmit={(email, password) => {
-            console.log("create account", { email, password });
+        <CreateAccountForm onBackToLogin={() => {setServerError(null); setView("login");}}
+            serverError={serverError}
+            isSubmitting={isSubmitting}
+            onSubmit={async (email: string, password: string) => {
+            setIsSubmitting(true);
+            setServerError(null);
+            try {
+              const res = await authApi.register(email, password);
+              auth.login(res.token, res.user);
+              handleClose(); // closes + resets view
+            } catch (e) {
+              const msg = e instanceof Error ? e.message : "Account creation failed";
+              setServerError(msg);
+            } finally {
+              setIsSubmitting(false);
+            }
           }}
         />
       )}
 
       {view === "forgotPassword" && (
-        <ForgotPasswordForm onBackToLogin={() => setView("login")}
-            onSubmit={(email: string) => {
-            console.log("reset password", { email });
+        <ForgotPasswordForm onBackToLogin={() => {setServerError(null); setView("login");}}
+            serverError={serverError}
+            isSubmitting={isSubmitting}
+            onSubmit={async (email: string) => {
+            setIsSubmitting(true);
+            setServerError(null);
+
+            try {
+              await authApi.forgotPassword(email);
+              setView("login");
+            } catch (e) {
+              const msg = e instanceof Error ? e.message : "Reset failed";
+              setServerError(msg);
+            } finally {
+              setIsSubmitting(false);
+            }
           }}
         />
       )}

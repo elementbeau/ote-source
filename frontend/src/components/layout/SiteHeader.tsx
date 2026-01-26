@@ -1,10 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import AuthModal from "../auth/AuthModal";
+import { useAuth } from "../auth/useAuth";
 
 
 export default function SiteHeader() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const auth = useAuth();
 
   return (
     <>
@@ -31,12 +33,23 @@ export default function SiteHeader() {
           </div>
 
           {/* Login */}
-          <button 
-            onClick = {() => setIsLoginOpen(true)}
-            className = "rounded-lg px-3 py-2 bg-gray-900 text-white text-sm ml-auto"
+          {auth.isAuthed ? (
+          <button
+            type="button"
+            onClick={() => auth.logout()}
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
           >
-            Log in
+            Sign out
           </button>
+          ) : (
+          <button
+            type="button"
+            onClick={() => setIsLoginOpen(true)}
+            className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
+          >
+            Sign in
+          </button>
+        )}
         </div>
       </header>
 

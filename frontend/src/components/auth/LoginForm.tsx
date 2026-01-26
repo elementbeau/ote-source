@@ -3,15 +3,19 @@ import FormError from "../UI/FormError";
 import PasswordInput from "../UI/PasswordInput";
 
 type LoginFormProps = {
-    onLogin?: (email: string, password: string) => void;
+    onLogin?: (email: string, password: string) => void | Promise<void>;
     onCreateAccount?: () => void;
     onForgotPassword?: () => void;
+    isSubmitting?: boolean;
+    serverError?: string | null;
 };
 
 export default function LoginForm({
     onLogin,
     onCreateAccount,
     onForgotPassword,
+    isSubmitting = false,
+    serverError = null,
 }: LoginFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -71,13 +75,13 @@ export default function LoginForm({
                 />
             </div>
 
-            <FormError message={error} />
+            <FormError message={serverError ?? error} />
 
             {/* Buttons */}
             <div className="space-y-2 pt-2">
                 <button
                     type="submit"
-                    disabled={!canSubmit} //Disabled until input is valid
+                    disabled={!canSubmit || isSubmitting} //Disabled until input is valid
                     className="w-full rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
                     >
                     Log in
