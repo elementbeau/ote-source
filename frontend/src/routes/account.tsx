@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from "react";
-import type { UserGetDto } from '../types/userDtos';
-import { localTestUser} from '../types/userDtos';
+import type { UserGetDto } from '../api/users';
+import { getUserById, patchUser } from "../api/users";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -20,11 +20,23 @@ function AccountPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    setProfile(localTestUser);
-    setUsername(localTestUser.username);
-    setFirstName(localTestUser.firstName ?? "");
-    setMiddleName(localTestUser.middleName ?? "");
-    setLastName(localTestUser.lastName ?? "");
+    const load = async () => {
+      try {
+        const id = Number(import.meta.env.VITE_DEV_USER_ID);
+        const user = await getUserById(id);
+
+        setProfile(user);
+        setUsername(user.username);
+        setFirstName(user.firstName ?? "");
+        setMiddleName(user.middleName ?? "");
+        setLastName(user.lastName ?? "");
+      } catch (err) {
+        setSaveState("error");
+        setErrorMsg(err instanceof Error ? err.message : "Failed to load profile.");
+      }
+    };
+
+    load();
   }, []);
 
   const email = profile?.emailAddress ?? "(missing)";
@@ -56,13 +68,12 @@ function AccountPage() {
 
       if (!profile) throw new Error("Profile not loaded.");
 
-      const updated: UserGetDto = {
-        ...profile,
+      const updated = await patchUser(profile.userId, {
         username: username.trim(),
         firstName: firstName.trim() || null,
         middleName: middleName.trim() || null,
         lastName: lastName.trim() || null,
-      };
+      });
 
       setProfile(updated);
       setSaveState("saved");
