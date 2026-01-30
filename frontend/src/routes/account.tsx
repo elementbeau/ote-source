@@ -1,134 +1,159 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from "react";
-import { useAuth } from "../components/auth/useAuth";
+import type { UserGetDto } from '../types/userDtos';
+import { localTestUser} from '../types/userDtos';
+
+type SaveState = "idle" | "saving" | "saved" | "error";
 
 export const Route = createFileRoute("/account")({
   component: AccountPage,
 });
 
-const PROFILE_KEY = "ote_profile";
-
-type Profile = {
-  firstName: string;
-  lastName: string;
-};
-
-function loadProfile(userId: string): Profile {
-  const raw = localStorage.getItem(`${PROFILE_KEY}:${userId}`);
-  if (!raw) return { firstName: "", lastName: "" };
-  try {
-    return JSON.parse(raw) as Profile;
-  } catch {
-    return { firstName: "", lastName: "" };
-  }
-}
-
-function saveProfile(userId: string, profile: Profile) {
-  localStorage.setItem(`${PROFILE_KEY}:${userId}`, JSON.stringify(profile));
-}
-
 function AccountPage() {
-  const auth = useAuth();
-  const navigate = useNavigate();
-  const userId = auth.user?.id ?? "unknown";
+  const [profile, setProfile] = useState<UserGetDto | null>(null);
+  const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [savedMsg, setSavedMsg] = useState<string | null>(null);
+
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!auth.isAuthed) {
-      navigate({ to: "/" });
-    }
-  }, [auth.isAuthed, navigate]);
+    setProfile(localTestUser);
+    setUsername(localTestUser.username);
+    setFirstName(localTestUser.firstName ?? "");
+    setMiddleName(localTestUser.middleName ?? "");
+    setLastName(localTestUser.lastName ?? "");
+  }, []);
 
-  useEffect(() => {
-  if (!auth.user?.id) return;
-  const p = loadProfile(auth.user.id);
-  setFirstName(p.firstName);
-  setLastName(p.lastName);
-  }, [auth.user?.id]);
+  const email = profile?.emailAddress ?? "(missing)";
 
-  if (!auth.isAuthed) {
+  function validate(): string | null {
+    const u = username.trim();
+    if (u.length === 0) return "Username is required.";
+    if (u.length > 255) return "Username must be less than 255 characters.";
+    if (firstName.trim().length > 255) return "First name must be less than 255 characters.";
+    if (middleName.trim().length > 255) return "Middle name must be less than 255 characters.";
+    if (lastName.trim().length > 255) return "Last name must be less than 255 characters.";
     return null;
   }
 
-  function handleSave() {
-    if (!auth.user?.id) return;
-    saveProfile(auth.user.id, { firstName, lastName });
-    setSavedMsg("Saved.");
-    window.setTimeout(() => setSavedMsg(null), 1500);
+  async function onSave() {
+    setErrorMsg(null);
+
+    const validationError = validate();
+    if (validationError) {
+      setSaveState("error");
+      setErrorMsg(validationError);
+      return;
+    }
+
+    setSaveState("saving");
+
+    try {
+      await new Promise((r) => setTimeout(r, 600));
+
+      if (!profile) throw new Error("Profile not loaded.");
+
+      const updated: UserGetDto = {
+        ...profile,
+        username: username.trim(),
+        firstName: firstName.trim() || null,
+        middleName: middleName.trim() || null,
+        lastName: lastName.trim() || null,
+      };
+
+      setProfile(updated);
+      setSaveState("saved");
+
+      setTimeout(() => setSaveState("idle"), 1500);
+    } catch (err) {
+      setSaveState("error");
+      setErrorMsg(err instanceof Error ? err.message : "Failed to save.");
+    }
   }
 
-return (
-    <div className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-semibold">My Account</h1>
+  const isSaving = saveState === "saving";
 
-      <div className="mt-4 space-y-4 rounded-xl border border-gray-200 bg-white p-5">
-        <div className="space-y-2">
-          <div>
-            <div className="text-xs font-medium text-gray-500">Email</div>
-            <div className="text-sm font-semibold text-gray-900">{auth.user?.email}</div>
-          </div>
+  return (
+    <div className="mx-auto max-w-2xl p-6 bg-amber-50">
+      <h1 className="text-2xl font-semibold">Account</h1>
 
-          <div>
-            <div className="text-xs font-medium text-gray-500">Username</div>
-            <div className="text-sm font-semibold text-gray-900">
-              {auth.user?.username ?? "(missing)"}
-            </div>
-          </div>
-
-          <div className="text-xs text-gray-400">User ID: {userId}</div>
+      <div className="mt-6 space-y-4 rounded-xl border p-4">
+        <div>
+          <div className="text-sm text-gray-800">Email</div>
+          <div className="font-medium">{email}</div>
         </div>
 
-        <hr className="border-gray-200" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <div className="text-sm text-gray-800">Username</div>
+            <input
+              className="mt-1 w-full rounded-md border px-3 py-2"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={isSaving}
+            />
+          </label>
 
-        <div className="space-y-3">
-          <div className="text-sm font-semibold text-gray-900">Profile</div>
+          <label className="block">
+            <div className="text-sm text-gray-800">First name</div>
+            <input
+              className="mt-1 w-full rounded-md border px-3 py-2"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              disabled={isSaving}
+            />
+          </label>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700" htmlFor="firstName">
-                First name
-              </label>
-              <input
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                placeholder="First name"
-              />
-            </div>
+          <label className="block">
+            <div className="text-sm text-gray-800">Middle name</div>
+            <input
+              className="mt-1 w-full rounded-md border px-3 py-2"
+              value={middleName}
+              onChange={(e) => setMiddleName(e.target.value)}
+              disabled={isSaving}
+            />
+          </label>
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700" htmlFor="lastName">
-                Last name
-              </label>
-              <input
-                id="lastName"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                placeholder="Last name"
-              />
-            </div>
+          <label className="block">
+            <div className="text-sm text-gray-800">Last name</div>
+            <input
+              className="mt-1 w-full rounded-md border px-3 py-2"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              disabled={isSaving}
+            />
+          </label>
+        </div>
+
+        {errorMsg && (
+          <div className="rounded-md border border-red-800 bg-red-100 p-3 text-sm">
+            {errorMsg}
           </div>
+        )}
 
-          <div className="flex items-center gap-3 pt-2">
-            <button
-              type="button"
-              onClick={handleSave}
-              className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
-            >
-              Save
-            </button>
+        <div className="flex items-center gap-3">
+          <button
+            className="rounded-md border px-4 py-2 font-medium disabled:opacity-50"
+            onClick={onSave}
+            disabled={isSaving || !profile}
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </button>
 
-            {savedMsg && <div className="text-sm text-gray-600">{savedMsg}</div>}
-          </div>
-
-          <div className="text-xs text-gray-500">
-          </div>
+          {saveState === "saved" && (
+            <div className="text-sm text-green-700">Saved.</div>
+          )}
         </div>
       </div>
+
+{/*   // Debug output for profiles
+      <pre className="mt-6 rounded-md border p-3 text-xs">
+        {JSON.stringify({ profile, username, firstName, middleName, lastName, saveState, errorMsg }, null, 2)}
+      </pre> */}
+      
     </div>
   );
 }
