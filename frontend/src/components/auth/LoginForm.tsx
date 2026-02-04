@@ -3,7 +3,7 @@ import FormError from "../ui/FormError";
 import PasswordInput from "../ui/PasswordInput";
 
 type LoginFormProps = {
-    onLogin?: (email: string, password: string) => void | Promise<void>;
+    onLogin?: (username: string, password: string) => void | Promise<void>;
     onCreateAccount?: () => void;
     onForgotPassword?: () => void;
     isSubmitting?: boolean;
@@ -17,19 +17,19 @@ export default function LoginForm({
     isSubmitting = false,
     serverError = null,
 }: LoginFormProps) {
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
 
-    const emailOk = email.includes("@") && email.includes(".");
+    const usernameOk = username.trim().length >= 3;
     const passwordOk = password.length >= 6;
-    const canSubmit = emailOk && passwordOk;
+    const canSubmit = usernameOk && passwordOk;
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        if (!emailOk) {
-            setError("Please enter a valid email address.");
+        if (!usernameOk) {
+            setError("Username must be at least 3 characters.");
             return;
         }
 
@@ -39,27 +39,27 @@ export default function LoginForm({
         }
 
         setError(null);
-        onLogin?.(email, password);
+        onLogin?.(username, password);
     }
 
     return (
         <form onSubmit={handleSubmit} className = "space-y-4">
-            {/* Email */}
+            {/* Username */}
             <div className = "space-y-1">
-                <label className = "text-sm font-medium text-gray-700" htmlFor = "email">
-                    Email
+                <label className = "text-sm font-medium text-gray-700" htmlFor = "username">
+                    Username
                 </label>
                 <input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    value={email}
+                    id="username"
+                    type="text"
+                    autoComplete="username"
+                    value={username}
                     onChange={(e) => {
-                        setEmail(e.target.value);
+                        setUsername(e.target.value);
                         if (error) setError(null);
                     }}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    placeholder="you@example.com"
+                    placeholder="username"
                     required
                     />
             </div>

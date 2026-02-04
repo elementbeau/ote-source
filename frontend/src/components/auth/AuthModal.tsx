@@ -37,12 +37,13 @@ export default function AuthModal({ isOpen, onClose}: AuthModalProps) {
         <LoginForm
           serverError={serverError}
           isSubmitting={isSubmitting}
-          onLogin={async (email: string, password: string) => {
-            console.log("Attempting login", { email }); // remove after done testing
+          onLogin={async (username: string, password: string) => {
+            console.log("Attempting login", { username }); // remove after done testing
             setIsSubmitting(true);
             setServerError(null);
+
             try {
-              const res = await authApi.login(email, password);
+              const res = await authApi.login(username, password);
               auth.login(res.token, res.user);
               handleClose(); // closes + resets view
             } catch (e) {
@@ -64,6 +65,7 @@ export default function AuthModal({ isOpen, onClose}: AuthModalProps) {
             onSubmit={async (email: string, username: string, password: string) => {
             setIsSubmitting(true);
             setServerError(null);
+
             try {
               const res = await authApi.register(email, username, password);
               auth.login(res.token, res.user);
@@ -98,7 +100,6 @@ export default function AuthModal({ isOpen, onClose}: AuthModalProps) {
           }}
         />
       )}
-      
     </Modal>
-    );
+  );
 }

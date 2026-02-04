@@ -18,6 +18,10 @@ export type UserPatchDto = Partial<{
   schoolId: number;
 }>;
 
+export async function getCurrentUser(): Promise<UserGetDto> {
+  return http<UserGetDto>("/api/users/me");
+}
+
 export async function getUserById(userId: number): Promise<UserGetDto> {
   return http<UserGetDto>(`/api/users/${userId}`);
 }

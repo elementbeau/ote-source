@@ -1,13 +1,26 @@
-const TOKEN_KEY = "ote_auth_token";
+import type { AuthUser } from "../services/AuthApi";
 
-export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+const KEY = "ote_auth";
+
+export type StoredAuth = {
+  token: string;
+  user: AuthUser;
+};
+
+export function loadAuth(): StoredAuth | null {
+  const raw = localStorage.getItem(KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as StoredAuth;
+  } catch {
+    return null;
+  }
 }
 
-export function setToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
+export function saveAuth(token: string, user: AuthUser) {
+  localStorage.setItem(KEY, JSON.stringify({ token, user } satisfies StoredAuth));
 }
 
-export function clearToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
+export function clearAuth() {
+  localStorage.removeItem(KEY);
 }

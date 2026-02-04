@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from "react";
 import type { UserGetDto } from '../api/users';
-import { getUserById, patchUser } from "../api/users";
+import { getCurrentUser, patchUser } from "../api/users";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -22,8 +22,8 @@ function AccountPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const id = Number(import.meta.env.VITE_DEV_USER_ID);
-        const user = await getUserById(id);
+        setSaveState("idle");
+        const user = await getCurrentUser();
 
         setProfile(user);
         setUsername(user.username);
@@ -86,6 +86,10 @@ function AccountPage() {
   }
 
   const isSaving = saveState === "saving";
+
+  if (!profile && saveState !== "error") {
+    return <div className="p-6 bg-amber-50">Loading account...</div>;
+  }
 
   return (
     <div className="mx-auto max-w-2xl p-6 bg-amber-50">
@@ -158,12 +162,14 @@ function AccountPage() {
             <div className="text-sm text-green-700">Saved.</div>
           )}
         </div>
+        
       </div>
 
 {/*   // Debug output for profiles
       <pre className="mt-6 rounded-md border p-3 text-xs">
         {JSON.stringify({ profile, username, firstName, middleName, lastName, saveState, errorMsg }, null, 2)}
       </pre> */}
+      
       
     </div>
   );

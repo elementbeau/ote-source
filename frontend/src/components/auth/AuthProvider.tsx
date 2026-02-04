@@ -1,56 +1,33 @@
-import { useEffect, useMemo, useState } from "react";
-import { clearToken, getToken, setToken as storeToken } from "../../services/AuthStorage";
-import { AuthContext, type AuthUser, type AuthState } from "./AuthContext";
-
-const USER_KEY = "ote_auth_user";
-
-function loadUser(): AuthUser | null {
-  const raw = localStorage.getItem(USER_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as AuthUser;
-  } catch {
-    return null;
-  }
-}
-
-function saveUser(user: AuthUser | null) {
-  if (!user) localStorage.removeItem(USER_KEY);
-  else localStorage.setItem(USER_KEY, JSON.stringify(user));
-}
+import { useMemo, useState } from "react";
+import { loadAuth, saveAuth, clearAuth } from "../../services/AuthStorage";
+import { AuthContext, type AuthState } from "./AuthContext";
+import type { AuthUser } from "../../services/AuthApi";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const saved = loadAuth();
 
-  useEffect(() => {
-    setToken(getToken());
-    setUser(loadUser());
-  }, []);
+  const [token, setToken] = useState<string | null>(saved?.token ?? null);
+  const [user, setUser] = useState<AuthUser | null>(saved?.user ?? null);
 
-  function login(newToken: string, newUser: AuthUser) {
-    storeToken(newToken);
-    saveUser(newUser);
-    setToken(newToken);
-    setUser(newUser);
-  }
-
-  function logout() {
-    clearToken();
-    saveUser(null);
-    setToken(null);
-    setUser(null);
-  }
+  const isAuthed = !!token && !!user;
 
   const value = useMemo<AuthState>(
     () => ({
+      isAuthed: Boolean(token),
       token,
       user,
-      isAuthed: Boolean(token),
-      login,
-      logout,
+      login: (newToken: string, newUser: AuthUser) => {
+        setToken(newToken);
+        setUser(newUser);
+        saveAuth(newToken, newUser);
+      },
+      logout: () => {
+        setToken(null);
+        setUser(null);
+        clearAuth();
+      },
     }),
-    [token, user]
+    [isAuthed, token, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
