@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import type { UserGetDto } from "../../../api/users";
-import { getCurrentUser, patchUser } from "../../../api/users";
+import { useCallback, useEffect, useState } from "react";
+import type { UserGetDto, UserPatchDto } from "../../../api/users";
+import { getUserById, patchUser } from "../../../api/users";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -11,10 +11,9 @@ type FormState = {
   lastName: string;
 };
 
-export function useAccountProfile() {
+export function useAccountProfile(userId: number | null) {
   const [profile, setProfile] = useState<UserGetDto | null>(null);
   const [loading, setLoading] = useState(true);
-
   const [form, setForm] = useState<FormState>({
     username: "",
     firstName: "",
@@ -24,30 +23,38 @@ export function useAccountProfile() {
 
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  
+  const reload = useCallback(async () => {
+    if (!userId) return;
+
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      const user = await getUserById(userId);
+      setProfile(user);
+      setForm({
+        username: user.username ?? "",
+        firstName: user.firstName ?? "",
+        middleName: user.middleName ?? "",
+        lastName: user.lastName ?? "",
+      });
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Failed to load profile.");
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
+    if (userId) {
+      reload();
+    } else {
+      setProfile(null);
       setErrorMsg(null);
-
-      try {
-        const user = await getCurrentUser();
-        setProfile(user);
-        setForm({
-          username: user.username ?? "",
-          firstName: user.firstName ?? "",
-          middleName: user.middleName ?? "",
-          lastName: user.lastName ?? "",
-        });
-      } catch (err) {
-        setErrorMsg(err instanceof Error ? err.message : "Failed to load profile.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
-  }, []);
+      setSaveState("idle");
+    }
+  }, [userId, reload]);
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -66,10 +73,9 @@ export function useAccountProfile() {
   async function save() {
     setErrorMsg(null);
 
-    const validationError = validate();
-    if (validationError) {
+    if (!userId) {
       setSaveState("error");
-      setErrorMsg(validationError);
+      setErrorMsg("Not logged in.");
       return;
     }
 
@@ -79,16 +85,23 @@ export function useAccountProfile() {
       return;
     }
 
+    const validationError = validate();
+    if (validationError) {
+      setSaveState("error");
+      setErrorMsg(validationError);
+      return;
+    }
     setSaveState("saving");
 
-    try {
-      const updated = await patchUser(profile.userId, {
-        username: form.username.trim(),
-        firstName: form.firstName.trim() || null,
-        middleName: form.middleName.trim() || null,
-        lastName: form.lastName.trim() || null,
-      });
+    const patch: UserPatchDto = {
+      username: form.username.trim(),
+      firstName: form.firstName.trim() || null,
+      middleName: form.middleName.trim() || null,
+      lastName: form.lastName.trim() || null,
+    };
 
+    try {
+      const updated = await patchUser(userId, patch);
       setProfile(updated);
       setSaveState("saved");
       setTimeout(() => setSaveState("idle"), 1500);
@@ -98,5 +111,5 @@ export function useAccountProfile() {
     }
   }
 
-  return { profile, form, setField, save, saveState, errorMsg, loading };
+  return { profile, form, setField, save, saveState, errorMsg, loading, reload };
 }

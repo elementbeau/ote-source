@@ -13,11 +13,10 @@ export class ApiError extends Error {
 type HttpOptions = {
   method?: "GET" | "POST" | "PATCH" | "DELETE";
   body?: unknown;
-  token?: string;
 };
 
 const API_BASE =
-  import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "") ?? "";
+import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "") ?? "";
 
 export async function http<T>(path: string, options: HttpOptions = {}): Promise<T> {
   const method = options.method ?? "GET";
@@ -30,13 +29,10 @@ export async function http<T>(path: string, options: HttpOptions = {}): Promise<
     headers["Content-Type"] = "application/json";
   }
 
-  if (options.token) {
-    headers["Authorization"] = `Bearer ${options.token}`;
-  }
-
   const res = await fetch(`${API_BASE}${path}`, {
     method,
     headers,
+    credentials: "include",
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
 
