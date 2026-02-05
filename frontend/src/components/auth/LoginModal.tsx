@@ -1,4 +1,4 @@
-import Modal from "../UI/Modal"
+import Modal from "../ui/Modal"
 import LoginForm from "../auth/LoginForm";
 
 type LoginModalProps = {
